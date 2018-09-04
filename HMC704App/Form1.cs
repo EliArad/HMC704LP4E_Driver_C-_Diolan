@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HardwareLib;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -18,7 +19,7 @@ namespace HMC704App
 
             try
             {
-                hmC703LP4EControl1.LoadControl();
+                hmC704LP4EControl1.LoadControl(AISPI.HMC704_CHIP_NUMBER.HMC704_CHIP1);
             }
             catch (Exception err)
             {

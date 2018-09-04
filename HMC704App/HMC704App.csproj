@@ -80,6 +80,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\API\HMC704LP4EApi.csproj">
+      <Project>{AEAC1096-E504-4776-B8C6-71F35DBEBA1F}</Project>
+      <Name>HMC704LP4EApi</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Control\HMC704Control.csproj">
       <Project>{2c9f8463-b556-4b71-924c-878dea69edbe}</Project>
       <Name>HMC704Control</Name>

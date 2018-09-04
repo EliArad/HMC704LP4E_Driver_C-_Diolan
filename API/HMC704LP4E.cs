@@ -9,6 +9,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static HardwareLib.AISPI;
 
 // http://www.analog.com/media/en/technical-documentation/data-sheets/hmc704.pdf
 
@@ -509,16 +510,16 @@ namespace HardwareLib
              REFDIV = 2,
              FrequencyRegisterIntegerPart = 0x3,
              FrequencyRegisterFractionalPart = 0x4,
-             Seed = 0x5,
-             SD_CFG = 0x6,
-             LockDetect = 0x7,
-             AnalogEN = 0x8,
-             ChargePump = 0x9,
-             AuxSPITrigger = 0xA,
-             PD = 0xB,
-             GPO = 0xF,
-             GPO2 = 0x12,
-             BISTStatus = 0x13,
+             REG5_Seed = 0x5,
+             REG6_SD_CFG = 0x6,
+             REG7_LockDetect = 0x7,
+             REG8_AnalogEN = 0x8,
+             REG9_ChargePump = 0x9,
+             REGA_AuxSPITrigger = 0xA,
+             REGB_PD = 0xB,
+             REGF_GPO = 0xF,
+             REG12_GPO2 = 0x12,
+             REG13_BISTStatus = 0x13,
 
         }
 
@@ -553,7 +554,7 @@ namespace HardwareLib
             public REG3_FrequencyIntegerPart regFreqInt;
             public REG4_FrequencyFractionaPart regFreqFrac;
             public REG5_AuxSPI regAuxSPI;
-            public REG6_SDCFG regSdCfg;
+            public REG6_SDCFG reg6SdCfg;
             public REG7_LockDetect regLockDetect;
             public REG8_AnalogEN regAnalogEn;
             public REG9_ChargePump regChargePump;
@@ -575,7 +576,7 @@ namespace HardwareLib
             public REG3_FrequencyIntegerPart regFreqInt;
             public REG4_FrequencyFractionaPart regFreqFrac;
             public REG5_AuxSPI regAuxSPI;
-            public REG6_SDCFG regSdCfg;
+            public REG6_SDCFG reg6SdCfg;
             public REG7_LockDetect regLockDetect;
             public REG8_AnalogEN regAnalogEn;
             public REG9_ChargePump regChargePump;
@@ -596,11 +597,23 @@ namespace HardwareLib
             LAST
         }
 
+        public void ConfigurePins(int SCK_Io, int SDI_Io, int SD_LDO_Io, int SEN_Io, int CEN_Io)
+        {
+            m_hmc.ConfigurePins(SCK_Io, SDI_Io, SD_LDO_Io, SEN_Io, CEN_Io);
+            m_hmc.Enable();
+        }
+        public void ConfigurePins(HMC704_CHIP_NUMBER chipNum)
+        {
+            m_hmc.ConfigurePins(chipNum);
+            m_hmc.Enable();
+        }
+
         public SynthHMC704LP4E(Device device)
         {
             try
             {
                 m_hmc = new HMCMode(device);
+                
                 
             }
             catch (Exception err)
@@ -609,7 +622,22 @@ namespace HardwareLib
             }
 
         }
-        
+
+        public SynthHMC704LP4E(Device device, HMC704_CHIP_NUMBER chipNum)
+        {
+            try
+            {
+                m_hmc = new HMCMode(device);
+                ConfigurePins(chipNum);
+                
+            }
+            catch (Exception err)
+            {
+                throw (new SystemException(err.Message));
+            }
+
+        }
+
         public void GetAllRegs(out AllRegs allRegs)
         {
 
@@ -619,7 +647,7 @@ namespace HardwareLib
             allRegs.regFreqInt = m_allRegs.regFreqInt;
             allRegs.regFreqFrac = m_allRegs.regFreqFrac;
             allRegs.regAuxSPI = m_allRegs.regAuxSPI;
-            allRegs.regSdCfg = m_allRegs.regSdCfg;
+            allRegs.reg6SdCfg = m_allRegs.reg6SdCfg;
             allRegs.regLockDetect = m_allRegs.regLockDetect;
             allRegs.regAnalogEn = m_allRegs.regAnalogEn;
             allRegs.regChargePump = m_allRegs.regChargePump;
@@ -634,16 +662,56 @@ namespace HardwareLib
 
         public enum DEF_FREQ
         {
-            FREQ_7900
+            FREQ_7900,
+            FREQ_8000
         }
 
         void SetDefault(DEF_FREQ frequency)
         {
+
+            if (frequency == DEF_FREQ.FREQ_8000)
+            {
+       
+
+                m_hmc.WriteRegister((HMC704LP4E_REGS)1, 2);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)2, 0x1);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)3, 0x50);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)5, 0x6095);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)6, 0x200B4A);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)7, 0xD4D);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)8, 0x9BEFF);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)9, 0xDBFFF);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0xA, 0x2205);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0xB, 0x78071);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0xC, 0x0);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0xD, 0x0);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0xE, 0x0);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0xF, 0x1);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x10, 0x20);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x11, 0x8001C);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x12, 0x3);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x13, 0x1259);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x14, 0x0);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x15, 0x0);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x16, 0x0);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x17, 0x0);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x18, 0x0);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x19, 0x0);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x1A, 0x0);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x1B, 0x0);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x1C, 0x0);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x1D, 0x0);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x1E, 0x0);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x1F, 0x0);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0x4, 0x0);
+
+                
+            }
             if (frequency == DEF_FREQ.FREQ_7900)
             {
+                 
 
-                m_hmc.WriteRegister((HMC704LP4E_REGS)0, 0xA7975);
-                m_hmc.WriteRegister((HMC704LP4E_REGS)1, 0x2);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)1, 2);
                 m_hmc.WriteRegister((HMC704LP4E_REGS)2, 0x1);
                 m_hmc.WriteRegister((HMC704LP4E_REGS)3, 0x4F);
                 m_hmc.WriteRegister((HMC704LP4E_REGS)5, 0x6095);
@@ -652,8 +720,8 @@ namespace HardwareLib
                 m_hmc.WriteRegister((HMC704LP4E_REGS)8, 0x9BEFF);
                 m_hmc.WriteRegister((HMC704LP4E_REGS)9, 0xDBFFF);
                 m_hmc.WriteRegister((HMC704LP4E_REGS)0xA, 0x2205);
-                m_hmc.WriteRegister((HMC704LP4E_REGS)0xB, 0x780718);
-                m_hmc.WriteRegister((HMC704LP4E_REGS)0xC, 0x99 /* 0x0*/);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0xB, 0x78071);
+                m_hmc.WriteRegister((HMC704LP4E_REGS)0xC, 0x0);
                 m_hmc.WriteRegister((HMC704LP4E_REGS)0xD, 0x0);
                 m_hmc.WriteRegister((HMC704LP4E_REGS)0xE, 0x0);
                 m_hmc.WriteRegister((HMC704LP4E_REGS)0xF, 0x1);
@@ -692,15 +760,20 @@ namespace HardwareLib
         }
         public string Initialize()
         {
-
-
-
+            SetDefault(DEF_FREQ.FREQ_8000);
             ReadAllRegisters();
-
-            SetDefault(DEF_FREQ.FREQ_7900);
 
             return "ok";
             
+        }
+
+        public bool CheckLockDetect()
+        {
+            uint data = m_hmc.ReadRegister(HMC704LP4E_REGS.REG12_GPO2);
+            m_allRegs.regGP02 = BF.CreateBitField<REG18_GPO2>(data);
+            if (m_allRegs.regGP02.LockDetect == 1) return true;
+            return false;
+
         }
         void ReadAllRegisters()
         {
@@ -731,43 +804,43 @@ namespace HardwareLib
             m_allRegs.regFreqFrac = BF.CreateBitField<REG4_FrequencyFractionaPart>(data);
             Console.WriteLine("m_allRegs.regFreqFrac {0:X}", m_allRegs.regFreqFrac.ToUInt32());
 
-            data = m_hmc.ReadRegister(HMC704LP4E_REGS.Seed);
+            data = m_hmc.ReadRegister(HMC704LP4E_REGS.REG5_Seed);
             m_allRegs.regAuxSPI = BF.CreateBitField<REG5_AuxSPI>(data);
             Console.WriteLine("m_allRegs.regSeed {0:X}", m_allRegs.regAuxSPI.ToUInt32());
 
-            data = m_hmc.ReadRegister(HMC704LP4E_REGS.SD_CFG);
-            m_allRegs.regSdCfg = BF.CreateBitField<REG6_SDCFG>(data);
-            Console.WriteLine("m_allRegs.regSdCfg {0:X}", m_allRegs.regSdCfg.ToUInt32());
+            data = m_hmc.ReadRegister(HMC704LP4E_REGS.REG6_SD_CFG);
+            m_allRegs.reg6SdCfg = BF.CreateBitField<REG6_SDCFG>(data);
+            Console.WriteLine("m_allRegs.regSdCfg {0:X}", m_allRegs.reg6SdCfg.ToUInt32());
 
-            data = m_hmc.ReadRegister(HMC704LP4E_REGS.LockDetect);
+            data = m_hmc.ReadRegister(HMC704LP4E_REGS.REG7_LockDetect);
             m_allRegs.regLockDetect = BF.CreateBitField<REG7_LockDetect>(data);
             Console.WriteLine("m_allRegs.regLockDetect {0:X}", m_allRegs.regLockDetect.ToUInt32());
 
-            data = m_hmc.ReadRegister(HMC704LP4E_REGS.AnalogEN);
+            data = m_hmc.ReadRegister(HMC704LP4E_REGS.REG8_AnalogEN);
             m_allRegs.regAnalogEn = BF.CreateBitField<REG8_AnalogEN>(data);
             Console.WriteLine("m_allRegs.regAnalogEn {0:X}", m_allRegs.regAnalogEn.ToUInt32());
 
-            data = m_hmc.ReadRegister(HMC704LP4E_REGS.ChargePump);
+            data = m_hmc.ReadRegister(HMC704LP4E_REGS.REG9_ChargePump);
             m_allRegs.regChargePump = BF.CreateBitField<REG9_ChargePump>(data);
             Console.WriteLine("m_allRegs.regChargePump {0:X}", m_allRegs.regChargePump.ToUInt32());
 
-            data = m_hmc.ReadRegister(HMC704LP4E_REGS.AuxSPITrigger);
+            data = m_hmc.ReadRegister(HMC704LP4E_REGS.REGA_AuxSPITrigger);
             m_allRegs.regAuxSPITrigger = BF.CreateBitField<REG10_AuxSPITrigger>(data);
             Console.WriteLine("m_allRegs.regModulationStep {0:X}", m_allRegs.regAuxSPITrigger.ToUInt32());
 
-            data = m_hmc.ReadRegister(HMC704LP4E_REGS.PD);
+            data = m_hmc.ReadRegister(HMC704LP4E_REGS.REGB_PD);
             m_allRegs.regPd = BF.CreateBitField<REG11_PD>(data);
             Console.WriteLine("m_allRegs.regPd {0:X}", m_allRegs.regPd.ToUInt64());
 
-            data = m_hmc.ReadRegister(HMC704LP4E_REGS.GPO);
+            data = m_hmc.ReadRegister(HMC704LP4E_REGS.REGF_GPO);
             m_allRegs.regGPO = BF.CreateBitField<REG15_GPO>(data);
             Console.WriteLine("m_allRegs.regGPO {0:X}", m_allRegs.regGPO.ToUInt32());
 
-            data = m_hmc.ReadRegister(HMC704LP4E_REGS.GPO2);
+            data = m_hmc.ReadRegister(HMC704LP4E_REGS.REG12_GPO2);
             m_allRegs.regGP02 = BF.CreateBitField<REG18_GPO2>(data);
             Console.WriteLine("m_allRegs.regGP02 {0:X}", m_allRegs.regGP02.ToUInt32());
 
-            data = m_hmc.ReadRegister(HMC704LP4E_REGS.BISTStatus);
+            data = m_hmc.ReadRegister(HMC704LP4E_REGS.REG13_BISTStatus);
             m_allRegs.regBitsStatus = BF.CreateBitField<REG19_BISTStatus>(data);
             Console.WriteLine("m_allRegs.regBitsStatus {0:X}", m_allRegs.regBitsStatus.ToUInt32());
            
@@ -775,18 +848,30 @@ namespace HardwareLib
         
         public void SetOperationMode(OperationModes mode)
         {
-            //uint data = m_hmc.ReadRegister(HMC704LP4E_REGS.SD_CFG);
-            //m_allRegs.regSdCfg = BF.CreateBitField<REG6_SDCFG>(data);
-            //m_allRegs.regSdCfg.mod = (uint)mode;
-            //m_hmc.WriteRegister(HMC704LP4E_REGS.SD_CFG, m_allRegs.regSdCfg.ToUInt32());
+            if (mode == OperationModes.Integer)
+            {
+                uint data = m_hmc.ReadRegister(HMC704LP4E_REGS.REG6_SD_CFG);
+                m_allRegs.reg6SdCfg = BF.CreateBitField<REG6_SDCFG>(data);
+                m_allRegs.reg6SdCfg.frac_rstb = 0;
+                m_allRegs.reg6SdCfg.frac_bypass = 1;
+                m_hmc.WriteRegister(HMC704LP4E_REGS.REG6_SD_CFG, m_allRegs.reg6SdCfg.ToUInt32());
+
+
+                data = m_hmc.ReadRegister(HMC704LP4E_REGS.FrequencyRegisterFractionalPart);
+                m_allRegs.regFreqFrac = BF.CreateBitField<REG4_FrequencyFractionaPart>(data);
+                m_allRegs.regFreqFrac.frac = 1;
+                m_hmc.WriteRegister(HMC704LP4E_REGS.FrequencyRegisterFractionalPart, m_allRegs.regFreqFrac.ToUInt32());
+
+                // R = 1 - we will use the default which set to 1 already
+
+            }
             m_operationMode = mode;
         }
 
         public void WriteRegister(HMC704LP4E_REGS reg, uint data)
         {
-            m_hmc.WriteRegister(HMC704LP4E_REGS.SD_CFG, data);
-        }
-                
+            m_hmc.WriteRegister(reg, data);
+        }                
 
         public void Power(PowerMode mode)
         {
@@ -796,6 +881,21 @@ namespace HardwareLib
             m_hmc.WriteRegister(HMC704LP4E_REGS.RST, m_allRegs.reg1Rst.ToUInt32());
         }
 
+        public uint LockDetectCount()
+        {
+            uint data = m_hmc.ReadRegister(HMC704LP4E_REGS.REG7_LockDetect);
+            m_allRegs.regLockDetect = BF.CreateBitField<REG7_LockDetect>(data);
+            return m_allRegs.regLockDetect.lkd_wincnt_max;
+
+        }
+        public void LockDetectCount (int count)
+        {
+            uint data = m_hmc.ReadRegister(HMC704LP4E_REGS.REG7_LockDetect);
+            m_allRegs.regLockDetect = BF.CreateBitField<REG7_LockDetect>(data);
+            //m_allRegs.reg1Rst.EnFromSPI = (uint)mode;
+            m_hmc.WriteRegister(HMC704LP4E_REGS.REG7_LockDetect, m_allRegs.regLockDetect.ToUInt32());
+        }
+
         void SetReferencePathDivisionRatio(uint data)
         {
             m_allRegs.regRefDiv.rdiv = data;
@@ -803,33 +903,43 @@ namespace HardwareLib
         }
         void SetRFDevideBy2(bool devide)
         {
-            uint data = m_hmc.ReadRegister(HMC704LP4E_REGS.AnalogEN);
-            //m_allRegs.regAnalogEn = BF.CreateBitField<REG8_AnalogEN>(data);
-            //m_allRegs.regAnalogEn.RFDiv2Sel = (uint)(devide == true ? 1 : 0);
-            m_hmc.WriteRegister(HMC704LP4E_REGS.RST, m_allRegs.reg1Rst.ToUInt32());
+            uint data = m_hmc.ReadRegister(HMC704LP4E_REGS.REG8_AnalogEN);
+            m_allRegs.regAnalogEn = BF.CreateBitField<REG8_AnalogEN>(data);
+            m_allRegs.regAnalogEn._8GHzDivideBy2En = (uint)(devide == true ? 1 : 0);
+            m_hmc.WriteRegister(HMC704LP4E_REGS.REG8_AnalogEN, m_allRegs.regAnalogEn.ToUInt32());
         }
-
-        public void SetFrequency(float frequency)
+         
+        // Set the frequency in MHZ
+        public void SetFrequency(double frequency)
         {
+            frequency = frequency * 1e6;
             switch (m_operationMode)
             {
 
                 case OperationModes.Integer:
                 {
-                    uint fps = (uint)(frequency / 2);
-                    double fpd = 50e6;
-                    uint R = 1;
-                    SetReferencePathDivisionRatio(R);
 
                     if (frequency >= 4e9)
                     {
+                        double f = frequency;
+                        double x = Math.Pow(2, 24);
+
+                        double N = (f * x - 2 * 50e6) / (2 * 50e6 * x);
+                        //Console.Write(N);
+
+                        m_hmc.WriteRegister(HMC704LP4E_REGS.FrequencyRegisterIntegerPart, (uint)N);
                         SetRFDevideBy2(true);
                     }
                     else
                     {
+
+                        double f = frequency;
+                        double x = Math.Pow(2, 24);
+                        double N = (f * x - 50e6) / (50e6 * x);
+                        //Console.Write(N);
+                        m_hmc.WriteRegister(HMC704LP4E_REGS.FrequencyRegisterIntegerPart, (uint)N);
                         SetRFDevideBy2(false);
                     }
-
                 }
                 break;
 

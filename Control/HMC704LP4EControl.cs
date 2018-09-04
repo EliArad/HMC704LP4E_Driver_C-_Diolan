@@ -12,19 +12,26 @@ using static HardwareLib.SynthHMC704LP4E;
 
 namespace HMC704ControlLib
 {
-    public partial class HMC703LP4EControl : UserControl
+    public partial class HMC704LP4EControl : UserControl
     {
         Diolan m_dln;
         SynthHMC704LP4E m_synth;
+
+       
+
         bool m_init = false;
         List<TextBox> m_allRegs = new List<TextBox>();
         List<uint> m_regs = new List<uint>();
         int[] n_regList = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xA, 0xB, 0xC, 0xF, 0x10, 0x11, 0x12, 0x13 };
 
-        public HMC703LP4EControl()
+        public HMC704LP4EControl()
         {
             InitializeComponent();
+            
             InitRegs();
+            lbLockDetect.On = false;
+
+
         }
 
         void InitRegs()
@@ -60,14 +67,27 @@ namespace HMC704ControlLib
                 i++;
             }
             m_init = true;
-        }
-        public void LoadControl()
-        {
-            m_dln = new Diolan();
-            m_synth = new SynthHMC704LP4E(m_dln.DiolanDevice);
-            m_synth.Initialize();
 
-            ReadAll();
+            txtLockDetectCount.Text = m_synth.LockDetectCount().ToString();
+        }
+        public void LoadControl(AISPI.HMC704_CHIP_NUMBER chipNum)
+        {
+            try
+            {
+                m_dln = new Diolan();
+
+                m_synth = new SynthHMC704LP4E(m_dln.DiolanDevice);
+                m_synth.ConfigurePins(chipNum);
+                m_synth.Initialize();             
+
+                ReadAll();
+
+                cmbFreqOperationMode.SelectedIndex = 0;
+            }
+            catch (Exception err)
+            {
+                throw (new SystemException(err.Message));
+            }
         }
 
         private void Reg0_result_TextChanged(object sender, EventArgs e)
@@ -225,6 +245,51 @@ namespace HMC704ControlLib
         private void btnReadReg1_Click(object sender, EventArgs e)
         {
             ReadRegister(1);
+        }
+
+        private void btnSetFrequency_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                double frequency = double.Parse(txtFrequency.Text);
+                m_synth.SetFrequency(frequency);
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message);
+                return;
+            }
+        
+            
+        }
+
+        private void cmbFreqOperationMode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cmbFreqOperationMode.SelectedIndex == 0)
+            {
+                m_synth.SetOperationMode(OperationModes.Integer);
+            }
+            if (cmbFreqOperationMode.SelectedIndex == 1)
+            {
+                //m_synth.SetOperationMode(OperationModes.frac);
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                double frequency = double.Parse(txtFrequency.Text);
+                m_synth.SetFrequency(frequency);
+                bool lockDetect = m_synth.CheckLockDetect();
+                lbLockDetect.On = lockDetect;
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message);
+                return;
+            }
+
         }
     }
 }

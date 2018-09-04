@@ -1,4 +1,6 @@
-﻿namespace HMC704App
+﻿using HMC704ControlLib;
+
+namespace HMC704App
 {
     partial class Form1
     {
@@ -28,23 +30,23 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.hmC703LP4EControl1 = new HMC704ControlLib.HMC703LP4EControl();
+            this.hmC704LP4EControl1 = new HMC704ControlLib.HMC704LP4EControl();
             this.SuspendLayout();
             // 
-            // hmC703LP4EControl1
+            // hmC704LP4EControl1
             // 
-            this.hmC703LP4EControl1.BackColor = System.Drawing.Color.White;
-            this.hmC703LP4EControl1.Location = new System.Drawing.Point(-12, -8);
-            this.hmC703LP4EControl1.Name = "hmC703LP4EControl1";
-            this.hmC703LP4EControl1.Size = new System.Drawing.Size(793, 572);
-            this.hmC703LP4EControl1.TabIndex = 0;
+            this.hmC704LP4EControl1.BackColor = System.Drawing.Color.White;
+            this.hmC704LP4EControl1.Location = new System.Drawing.Point(0, 12);
+            this.hmC704LP4EControl1.Name = "hmC704LP4EControl1";
+            this.hmC704LP4EControl1.Size = new System.Drawing.Size(910, 572);
+            this.hmC704LP4EControl1.TabIndex = 0;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(784, 566);
-            this.Controls.Add(this.hmC703LP4EControl1);
+            this.ClientSize = new System.Drawing.Size(911, 587);
+            this.Controls.Add(this.hmC704LP4EControl1);
             this.Name = "Form1";
             this.Text = "Form1";
             this.ResumeLayout(false);
@@ -53,7 +55,7 @@
 
         #endregion
 
-        private HMC704ControlLib.HMC703LP4EControl hmC703LP4EControl1;
+        private HMC704LP4EControl hmC704LP4EControl1;
     }
 }
 

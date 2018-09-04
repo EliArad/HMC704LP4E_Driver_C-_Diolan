@@ -7,17 +7,28 @@ using System.Threading;
 using System.Threading.Tasks;
 
 
-// the data sheet: http://www.analog.com/media/en/technical-documentation/data-sheets/hmc703.pdf
+// the data sheet: http://www.analog.com/media/en/technical-documentation/data-sheets/hmc704.pdf
 
 namespace HardwareLib
 {
     public class HMCMode : AISPI
     {
-         
+
+        bool m_enable = false;    
         public HMCMode(Device dlnDevice) : base (dlnDevice)
         {
+
+        }
+
+        public void Enable()
+        {
+            if (m_configured == false)
+            {
+                throw (new SystemException("Not configured"));
+            }
             //If a rising edge on SEN is detected first HMC Mode is selected.
             SENSet();
+            m_enable = true;
         }
 
         /*
@@ -37,6 +48,15 @@ namespace HardwareLib
 
         public override void WriteRegister(SynthHMC704LP4E.HMC704LP4E_REGS reg, uint data)
         {
+
+            if (m_configured == false)
+            {
+                throw (new SystemException("Not configured"));
+            }
+            if (m_enable == false)
+            {
+                throw (new SystemException("HMC Mode is not enabled"));
+            }
 
             byte address = (byte)((((byte)reg & 0x3F)));
 
@@ -66,7 +86,7 @@ namespace HardwareLib
                 SCKClr();
                 address = (byte)(address << 1);
             }
-             
+         
             // Write 24 bits data , MSB first 
             for (int i = 0; i < 24; i++)
             {
@@ -108,8 +128,15 @@ namespace HardwareLib
          */
 
         public override uint ReadRegister(SynthHMC704LP4E.HMC704LP4E_REGS reg)
-        { 
-           
+        {
+            if (m_configured == false)
+            {
+                throw (new SystemException("Not configured"));
+            }
+            if (m_enable == false)
+            {
+                throw (new SystemException("HMC Mode is not enabled"));
+            }
             byte address = (byte)((((byte)reg & 0x3F)));
 
             SCKClr();
